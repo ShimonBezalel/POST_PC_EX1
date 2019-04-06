@@ -22,7 +22,7 @@ class MessageHolder extends RecyclerView.ViewHolder {
     final TextView textview;
     MessageHolder( View itemView) {
         super(itemView);
-        textview = itemView.findViewById(R.id.textInput);
+        textview = itemView.findViewById(R.id.textView);
     }
 }
 

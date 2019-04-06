@@ -15,7 +15,7 @@ public class Message implements Parcelable{
     }
 
 
-    private Message(String msg) {
+    Message(String msg) {
         this.msg = msg;
     }
 
