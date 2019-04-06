@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 
+
 public class Message implements Parcelable{
 
     private String msg;
