@@ -19,7 +19,7 @@
         app:srcCompat="@android:drawable/ic_menu_send" />
 
     <EditText
-        android:id="@+id/text_input"
+        android:id="@+id/textInput"
         android:layout_width="320dp"
         android:layout_height="49dp"
         android:layout_marginStart="8dp"
@@ -37,6 +37,7 @@
         />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messageView"
         android:layout_width="0dp"
         android:layout_height="656dp"
         android:layout_marginStart="8dp"
