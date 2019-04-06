@@ -29,7 +29,7 @@
         android:gravity="bottom"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="216dp">
+        >
 
         <EditText
             android:id="@+id/textInput"

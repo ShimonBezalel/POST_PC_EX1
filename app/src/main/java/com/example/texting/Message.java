@@ -24,14 +24,7 @@ public class Message implements Parcelable{
     }
 
     static ArrayList<Message> getAll() {
-        ArrayList<Message> messageList = new ArrayList<>();
-
-        // testing the list
-        messageList.add(new Message("hey"));
-        messageList.add(new Message("whatsapp"));
-
-
-        return messageList;
+        return new ArrayList<>();
     }
 
     @Override
@@ -44,11 +37,6 @@ public class Message implements Parcelable{
 //        if (this == other) return true;
         if (other == null ||this.getClass() != other.getClass()) return false;
         return this.msg.equals(((Message)other).msg);
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
     }
 
     @Override
@@ -65,4 +53,11 @@ public class Message implements Parcelable{
             return new Message[size];
         }
     };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+
 }
