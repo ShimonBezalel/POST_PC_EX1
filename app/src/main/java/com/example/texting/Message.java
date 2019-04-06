@@ -3,11 +3,11 @@ package com.example.texting;
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class MessageView {
+public class Message {
 
     private String msg;
 
-    public MessageView(String msg) {
+    public Message(String msg) {
         this.msg = msg;
     }
 
@@ -18,8 +18,13 @@ public class MessageView {
 
     private static int lastContactId = 0;
 
-    public static ArrayList<MessageView> createMessageList() {
-        ArrayList<MessageView> messageList = new ArrayList<MessageView>();
+    public static ArrayList<Message> getAll() {
+        ArrayList<Message> messageList = new ArrayList<Message>();
+
+        // testing the list
+        messageList.add(new Message("hey"));
+        messageList.add(new Message("whatsapp"));
+
 
         return messageList;
     }
@@ -33,6 +38,6 @@ public class MessageView {
     public boolean equals(Object other) {
 //        if (this == other) return true;
         if (other == null ||this.getClass() != other.getClass()) return false;
-        return this.msg.equals(((MessageView)other).msg);
+        return this.msg.equals(((Message)other).msg);
     }
 }
