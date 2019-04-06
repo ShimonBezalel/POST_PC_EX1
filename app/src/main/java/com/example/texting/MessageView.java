@@ -1,6 +1,7 @@
 package com.example.texting;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class MessageView {
 
@@ -21,6 +22,11 @@ public class MessageView {
         ArrayList<MessageView> messageList = new ArrayList<MessageView>();
 
         return messageList;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(msg);
     }
 
     @Override
