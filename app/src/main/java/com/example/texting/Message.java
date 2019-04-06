@@ -1,25 +1,30 @@
 package com.example.texting;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 import java.util.Objects;
 
-public class Message {
+public class Message implements Parcelable{
 
     private String msg;
 
-    public Message(String msg) {
+    private Message(Parcel in) {
+        msg = in.readString();
+    }
+
+
+    private Message(String msg) {
         this.msg = msg;
     }
 
-    public String getMsg() {
+    String getMsg() {
         return msg;
     }
 
-
-    private static int lastContactId = 0;
-
-    public static ArrayList<Message> getAll() {
-        ArrayList<Message> messageList = new ArrayList<Message>();
+    static ArrayList<Message> getAll() {
+        ArrayList<Message> messageList = new ArrayList<>();
 
         // testing the list
         messageList.add(new Message("hey"));
@@ -40,4 +45,24 @@ public class Message {
         if (other == null ||this.getClass() != other.getClass()) return false;
         return this.msg.equals(((Message)other).msg);
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(msg);
+    }
+
+    public static final Parcelable.Creator<Message> CREATOR = new Parcelable.Creator<Message>() {
+        public Message createFromParcel(Parcel in) {
+            return new Message(in);
+        }
+
+        public Message[] newArray(int size) {
+            return new Message[size];
+        }
+    };
 }

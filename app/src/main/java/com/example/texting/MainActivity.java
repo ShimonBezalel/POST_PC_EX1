@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private  MessageRecyclerUtils.MessageAdapter adapter = new MessageRecyclerUtils.MessageAdapter();
-    private ArrayList<Message> messageList = new ArrayList<Message>(Message.getAll());
+    private  MessageAdapter adapter = new MessageAdapter();
+    private ArrayList<Message> messageList = new ArrayList<>(Message.getAll());
 
 
     @Override
@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
         ImageButton send = (ImageButton) findViewById(R.id.sendButton);
         final EditText editText = (EditText) findViewById(R.id.textInput);
 
-        messageView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL,false));
+        messageView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
         messageView.setAdapter(adapter);
         adapter.submitList(messageList);
 
