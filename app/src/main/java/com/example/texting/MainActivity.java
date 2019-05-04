@@ -21,12 +21,15 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
     private static String ALERT_BAD_INPUT = "Cannot send illegal message!";
 
     private  MessageAdapter adapter = new MessageAdapter();
-    private MessageDB database = MessageDB.getInstance(this);
-    private ArrayList<Message> messageList  = new ArrayList<>(database.dataObj().selectAll());
+    private MessageDB database;
+    private ArrayList<Message> messageList ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.database = MessageDB.getInstance(this);
+        this.messageList = new ArrayList<>(this.database.dataObj().selectAll());
+        this.adapter.callback = this;
         Log.e("onCreate", String.format("messages size: %d", this.messageList.size() ));
 
         setContentView(R.layout.activity_main);
@@ -38,13 +41,12 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
         editText.setText("");
 
         messageView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
-        messageView.setAdapter(adapter);
-        adapter.submitList(messageList);
-        System.out.println(savedInstanceState);
+        messageView.setAdapter(this.adapter);
+        this.adapter.submitList(this.messageList);
         if (savedInstanceState != null) {
             editText.setText(savedInstanceState.getString("msg_holder"));
-            messageList = savedInstanceState.getParcelableArrayList("msg_holder");
-            adapter.submitList(messageList);
+            this.messageList = savedInstanceState.getParcelableArrayList("msg_holder");
+            this.adapter.submitList(this.messageList);
         }
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -55,9 +57,10 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
                     // No further alterations to app state need to be made
                     return;
                 }
+                messageList.add(newMessage);
                 ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
                 database.dataObj().insert(newMessage);
-                copyOfMessages.add(newMessage);
+//                copyOfMessages.add(newMessage);
                 adapter.submitList(copyOfMessages);
                 editText.setText("");
             }
@@ -78,15 +81,16 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
     public void onMessageClick(final Message message) {
         DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener(){
             public void onClick( DialogInterface dialogInterface, int arg) {
+                messageList.remove(message);
                 ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
-                copyOfMessages.remove(message);
+//                copyOfMessages.remove(message);
                 database.dataObj().delete(message);
                 adapter.submitList(copyOfMessages);
             }
         };
         new AlertDialog.Builder(this)
-                .setTitle("Delete Message")
-                .setMessage("Are you sure?")
+                .setTitle("Deleting Message")
+                .setMessage("Are you sure? Cannot undo delete.")
                 .setPositiveButton(android.R.string.yes, listener)
                 .setNegativeButton(android.R.string.no, null)
                 .setIcon(android.R.drawable.ic_dialog_alert)
