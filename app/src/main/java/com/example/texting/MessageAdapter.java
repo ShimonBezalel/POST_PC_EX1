@@ -44,7 +44,7 @@ class  MessageCallback extends DiffUtil.ItemCallback<Message> {
 
 public class MessageAdapter extends ListAdapter<Message, MessageHolder> {
 
-        public MessageClickCallback callback;
+        MessageClickCallback callback;
 
         MessageAdapter(){
             super(new MessageCallback());
@@ -55,7 +55,20 @@ public class MessageAdapter extends ListAdapter<Message, MessageHolder> {
         public MessageHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
             Context context =  viewGroup.getContext();
             View itemView = LayoutInflater.from(context).inflate(R.layout.item_single_message,viewGroup,false);
-            return new MessageHolder(itemView);
+            final MessageHolder messageHolder = new MessageHolder(itemView);
+            messageHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View arg) {
+                    Message message = getItem(messageHolder.getAdapterPosition());
+                    if (callback != null){
+                        callback.onMessageClick(message);
+                        return true;
+                    }
+                    return false;
+                }
+
+            });
+            return messageHolder;
         }
 
         @Override

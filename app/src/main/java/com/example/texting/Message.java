@@ -6,10 +6,18 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
 
+
+@Entity
 public class Message implements Parcelable{
+    @PrimaryKey(autoGenerate = true)
+    public int user_id;
 
+    @ColumnInfo(name= "text_message")
     private String msg;
 
     private Message(Parcel in) {
