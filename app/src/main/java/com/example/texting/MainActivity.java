@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
         });
     }
 
+
     @Override
     public void onSaveInstanceState(@NonNull Bundle savedInstanceState) {
         final EditText editText = (EditText) findViewById(R.id.textInput);
