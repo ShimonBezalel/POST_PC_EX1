@@ -19,6 +19,7 @@ public class Message implements Parcelable{
 
     @ColumnInfo(name= "text_message")
     private String msg;
+    private UUID message_id;
 
     private Message(Parcel in) {
         msg = in.readString();
@@ -27,10 +28,15 @@ public class Message implements Parcelable{
 
     Message(String msg) {
         this.msg = msg;
+        this.message_id = UUID.randomUUID();
     }
 
     String getMsg() {
         return msg;
+    }
+
+    String getId(){
+        return this.message_id.toString();
     }
 
     static ArrayList<Message> getAll() {

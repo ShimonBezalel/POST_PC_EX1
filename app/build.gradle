@@ -19,6 +19,8 @@ android {
 }
 
 dependencies {
+//    implementation 'com.google.firebase:firebase-core:16.0.1'
+    implementation 'com.google.firebase:firebase-core:16.0.9'
     implementation 'com.google.firebase:firebase-firestore:19.0.0'
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
@@ -35,3 +37,4 @@ dependencies {
 
 }
 //2.1.0-alpha04
+apply plugin: 'com.google.gms.google-services'

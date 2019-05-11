@@ -11,6 +11,7 @@ import android.widget.ImageButton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import android.util.Log;
 import android.app.AlertDialog;
@@ -18,6 +19,8 @@ import android.content.DialogInterface;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -33,31 +36,18 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
     private MessageDB database;
     private ArrayList<Message> messageList ;
     private FirebaseFirestore db;
-    String TAG = "tag";
+//    String TAG = "tag";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        FirebaseApp.initializeApp(this);
         this.db = FirebaseFirestore.getInstance();
+        CollectionReference colRef = this.db.collection("messages");
 
         Map<String, Object> user = new HashMap<>();
         user.put("message", "test message");
         user.put("id", "test id");
 
-        // Add a new document with a generated ID
-        db.collection("messages")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error adding document", e);
-                    }
-                });
 
         this.database = MessageDB.getInstance(this);
         this.messageList = new ArrayList<>(this.database.dataObj().selectAll());
@@ -82,17 +72,35 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
         }
         send.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Message newMessage = new Message(editText.getText().toString());
+                final Message newMessage = new Message(editText.getText().toString());
                 Toast emptyMsg = Toast.makeText(getApplicationContext(), ALERT_BAD_INPUT, Toast.LENGTH_SHORT);
                 if (newMessage.getMsg().equals("")){ // Attempting to send empty message
                     emptyMsg.show();
                     // No further alterations to app state need to be made
                     return;
                 }
+                Map<String, Object> newMessageObj = new HashMap<>();
+                UUID uid = UUID.randomUUID();
+                newMessageObj.put("message", newMessage.getMsg());
+                newMessageObj.put("id", uid.toString());
+                // Add a new document with a generated ID
+                db.collection("messages").document("message_list")
+                        .update(newMessageObj)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.w("firestone", String.format("added %s", newMessage.getMsg()));
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("firestone", String.format("failed to add %s:\n%s", newMessage.getMsg(), e));
+                            }
+                        });
                 messageList.add(newMessage);
                 ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
                 database.dataObj().insert(newMessage);
-//                copyOfMessages.add(newMessage);
                 adapter.submitList(copyOfMessages);
                 editText.setText("");
             }
