@@ -9,9 +9,18 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 
@@ -23,10 +32,33 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
     private  MessageAdapter adapter = new MessageAdapter();
     private MessageDB database;
     private ArrayList<Message> messageList ;
-
+    private FirebaseFirestore db;
+    String TAG = "tag";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        this.db = FirebaseFirestore.getInstance();
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("message", "test message");
+        user.put("id", "test id");
+
+        // Add a new document with a generated ID
+        db.collection("messages")
+                .add(user)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error adding document", e);
+                    }
+                });
+
         this.database = MessageDB.getInstance(this);
         this.messageList = new ArrayList<>(this.database.dataObj().selectAll());
         this.adapter.callback = this;
