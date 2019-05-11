@@ -23,9 +23,12 @@ interface DataObj{
 
     @Delete
     void delete(Message message);
+
+    @Query("SELECT * FROM `Message` WHERE id = :id LIMIT 1")
+    List<Message> getItemId(String id);
 }
 
-@Database(entities = {Message.class}, version = 1, exportSchema = false)
+@Database(entities = {Message.class}, version = 3, exportSchema = false)
 public abstract class MessageDB extends RoomDatabase {
     private static MessageDB singleton = null ;
 
@@ -33,7 +36,9 @@ public abstract class MessageDB extends RoomDatabase {
     public static MessageDB getInstance(Context context){
         if( MessageDB.singleton == null ){
             MessageDB.singleton = Room.databaseBuilder(context.getApplicationContext(), MessageDB.class, "user-db")
-                    .allowMainThreadQueries().build();
+                    .allowMainThreadQueries()
+                    .fallbackToDestructiveMigration()
+                    .build();
         }
         return MessageDB.singleton;
     }

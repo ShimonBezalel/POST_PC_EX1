@@ -58,7 +58,6 @@ public class MessageAdapter extends ListAdapter<Message, MessageHolder> {
             messageHolder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View arg) {
-//                    Message message = getItem(index);
                     Message message = getItem(messageHolder.getAdapterPosition());
                     System.out.println(message);
                     if (callback != null){

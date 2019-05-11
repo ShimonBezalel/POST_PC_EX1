@@ -10,19 +10,22 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import android.util.Log;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -33,24 +36,60 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
     private static String ALERT_BAD_INPUT = "Cannot send illegal message!";
 
     private  MessageAdapter adapter = new MessageAdapter();
-    private MessageDB database;
+    private MessageDB localDatabase;
     private ArrayList<Message> messageList ;
-    private FirebaseFirestore db;
-//    String TAG = "tag";
+    private FirebaseFirestore firestore;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         FirebaseApp.initializeApp(this);
-        this.db = FirebaseFirestore.getInstance();
-        CollectionReference colRef = this.db.collection("messages");
+        this.firestore = FirebaseFirestore.getInstance();
+        this.localDatabase = MessageDB.getInstance(this);
+        this.firestore.collection("messages").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            QuerySnapshot result = task.getResult();
+                            if (result != null){
+                                List<DocumentSnapshot> documents = result.getDocuments();
+                                for (DocumentSnapshot document: documents){
+                                    if (document != null) {
+                                        Log.d("firestore", "DocumentSnapshot data: " + document.getData());
+                                        for (String field: new String[]{"id", "msg"}){
+                                            if (document.get(field) == null){
+                                                Log.d("firestore",
+                                                        String.format("Bad remote database entry. Missing field %s", field));
+                                            }
+                                        }
+                                        String id = document.get("id").toString();
+                                        // Check if item already exists in local db, else add
+                                        if (localDatabase.dataObj().getItemId(id).size() == 0){
+                                            String message = document.get("msg").toString();
+                                            Message remoteMessage = new Message(message);
+                                            remoteMessage.setId(id);
+                                            localDatabase.dataObj().insert(remoteMessage);
+                                            Log.d("firestore", String.format("Added %s to local.", message));
+                                            Log.d("firestore" ,localDatabase.dataObj().selectAll().toString());
+                                        }
+                                    } else {
+                                        Log.d("firestore", "No such document");
+                                    }
+                                }
+                            }
 
-        Map<String, Object> user = new HashMap<>();
-        user.put("message", "test message");
-        user.put("id", "test id");
+                        } else {
+                            Log.d("firestore", "get failed with ", task.getException());
+                        }
+                    }
+                });
 
 
-        this.database = MessageDB.getInstance(this);
-        this.messageList = new ArrayList<>(this.database.dataObj().selectAll());
+        this.messageList = new ArrayList<>(this.localDatabase.dataObj().selectAll());
         this.adapter.callback = this;
         Log.e("onCreate", String.format("messages size: %d", this.messageList.size() ));
 
@@ -80,16 +119,15 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
                     return;
                 }
                 Map<String, Object> newMessageObj = new HashMap<>();
-                UUID uid = UUID.randomUUID();
-                newMessageObj.put("message", newMessage.getMsg());
-                newMessageObj.put("id", uid.toString());
-                // Add a new document with a generated ID
-                db.collection("messages").document("message_list")
-                        .update(newMessageObj)
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                newMessageObj.put("msg", newMessage.getMsg());
+                newMessageObj.put("id", newMessage.getId());
+                // Add to existing document
+                firestore.collection("messages").add(newMessageObj)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                             @Override
-                            public void onSuccess(Void aVoid) {
-                                Log.w("firestone", String.format("added %s", newMessage.getMsg()));
+                            public void onSuccess(DocumentReference documentReference) {
+                                Log.i("firestone", String.format("added %s", newMessage.getMsg()));
+
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -100,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
                         });
                 messageList.add(newMessage);
                 ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
-                database.dataObj().insert(newMessage);
+                localDatabase.dataObj().insert(newMessage);
                 adapter.submitList(copyOfMessages);
                 editText.setText("");
             }
@@ -124,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
                 messageList.remove(message);
                 ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
 //                copyOfMessages.remove(message);
-                database.dataObj().delete(message);
+                localDatabase.dataObj().delete(message);
                 adapter.submitList(copyOfMessages);
             }
         };

@@ -17,18 +17,21 @@ public class Message implements Parcelable{
     @PrimaryKey(autoGenerate = true)
     public int user_id;
 
-    @ColumnInfo(name= "text_message")
+    @ColumnInfo(name= "msg")
     private String msg;
-    private UUID message_id;
+
+    @ColumnInfo(name= "id")
+    private String id;
 
     private Message(Parcel in) {
         msg = in.readString();
+        id = UUID.randomUUID().toString();
     }
-
 
     Message(String msg) {
         this.msg = msg;
-        this.message_id = UUID.randomUUID();
+        UUID uid = UUID.randomUUID();
+        this.id = uid.toString();
     }
 
     String getMsg() {
@@ -36,7 +39,11 @@ public class Message implements Parcelable{
     }
 
     String getId(){
-        return this.message_id.toString();
+        return this.id;
+    }
+
+    void setId(String newId){
+        this.id = newId;
     }
 
     static ArrayList<Message> getAll() {
