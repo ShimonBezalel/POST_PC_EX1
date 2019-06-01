@@ -3,6 +3,13 @@ package com.example.texting;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Parcelable;
+import android.preference.PreferenceManager;
+import android.widget.TextView;
 import android.widget.Toast;
 import android.os.Bundle;
 import android.view.View;
@@ -29,11 +36,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-
+@SuppressLint("SetTextI18n")
 public class MainActivity extends AppCompatActivity implements MessageClickCallback {
 
     private static String EMPTY_MESSAGE = "";
+    String USER_NAME = "USER_NAME";
     private static String ALERT_BAD_INPUT = "Cannot send illegal message!";
+
 
     private  MessageAdapter adapter = new MessageAdapter();
     private MessageDB localDatabase;
@@ -94,6 +103,15 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
         Log.e("onCreate", String.format("messages size: %d", this.messageList.size() ));
 
         setContentView(R.layout.activity_main);
+        SharedPreferences sp= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String userName = sp.getString(USER_NAME, null);
+        TextView welcome_message = (TextView) findViewById(R.id.welcome_msg);
+        if( userName != null){
+            welcome_message.setText("Welcome " + userName + "!");
+        }
+        else{
+            welcome_message.setText("Welcome Guest!");
+        }
 
         // Retrieve activity objects
         final RecyclerView messageView = findViewById(R.id.messageView);
@@ -157,22 +175,26 @@ public class MainActivity extends AppCompatActivity implements MessageClickCallb
 
     @Override
     public void onMessageClick(final Message message) {
-        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener(){
-            public void onClick( DialogInterface dialogInterface, int arg) {
-                messageList.remove(message);
-                ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
-//                copyOfMessages.remove(message);
-                localDatabase.dataObj().delete(message);
-                adapter.submitList(copyOfMessages);
-            }
-        };
-        new AlertDialog.Builder(this)
-                .setTitle("Deleting Message")
-                .setMessage("Are you sure? Cannot undo delete.")
-                .setPositiveButton(android.R.string.yes, listener)
-                .setNegativeButton(android.R.string.no, null)
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+//        DialogInterface.OnClickListener listener = new DialogInterface.OnClickListener(){
+//            public void onClick( DialogInterface dialogInterface, int arg) {
+//                messageList.remove(message);
+//                ArrayList<Message> copyOfMessages = new ArrayList<>(messageList);
+////                copyOfMessages.remove(message);
+//                localDatabase.dataObj().delete(message);
+//                adapter.submitList(copyOfMessages);
+//            }
+//        };
+        Intent intent = new Intent(this, ViewMessage.class);
+        intent.putExtra("MESSAGE", (Parcelable) message);
+        startActivity(intent);
+
+//        new AlertDialog.Builder(this)
+//                .setTitle("Deleting Message")
+//                .setMessage("Are you sure? Cannot undo delete.")
+//                .setPositiveButton(android.R.string.yes, listener)
+//                .setNegativeButton(android.R.string.no, null)
+//                .setIcon(android.R.drawable.ic_dialog_alert)
+//                .show();
     }
 
 }

@@ -32,5 +32,6 @@
     <string name="this_is_my_app">This is my app</string>
     <string name="skip">Skip</string>
     <string name="continue_b">Continue</string>
+    <string name="welcome_user">Welcome User!</string>
 
 </resources>
